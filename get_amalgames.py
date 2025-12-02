@@ -57,7 +57,7 @@ def voisins(eps,points):
             paquets.append(Paquet(g))
     return paquets
 
-def trouver_balises(paquets, eps=100):
+def trouver_balises(paquets, eps=250):
     for p in paquets:
         for i in paquets:
             if abs(distance(p.centre,i.centre)-np.sqrt(3000**2+1000**2))<eps:
@@ -80,3 +80,4 @@ if __name__ == "__main__":
     points_propres=filtre_points(points)                       
     paquets=voisins(50,points_propres)
     paquets_filtres=filtre_paquets(paquets,res)
+
