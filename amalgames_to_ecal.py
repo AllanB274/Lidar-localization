@@ -34,7 +34,7 @@ class LidarWatcher:
         res=0.7 #resolution angulaire mais celle calculée est de 0.788 donc à voir
         points=[Point(data.message.angles[i], data.message.distances[i], data.message.quality[i]) for i in range(len(data.message.distances))]
         points_propres=filtre_points(points)                       
-        paquets=voisins(50,points_propres)
+        paquets=voisins(100,points_propres)
         paquets_filtres=filtre_paquets(paquets,res)
         balises=trouver_balises(paquets_filtres)
         self.send_data_amal(paquets)
@@ -66,3 +66,4 @@ if __name__ == "__main__":
         while ecal_core.ok():
 
             time.sleep(0.5)
+
