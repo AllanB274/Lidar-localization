@@ -22,32 +22,42 @@ def distance(p1,p2):
 def filtre_points(points):
     points_propres=[]
     for p in points:
-        if p.dist < np.sqrt(2000**2+3000**2) and p.qualite > 200:
+        if p.dist < np.sqrt(2000**2+3000**2) and p.dist > 10 and p.qualite > 200:
             points_propres.append(p)
     return points_propres
 
+def filtre_paquets(paquets,res):
+    paquets_filtres=[]
+    alpha=res*(np.pi/180)
+    for p in paquets:
+        nb_max=1+(100//(2*p.centre.dist*np.sin(alpha/2)))
+        if p.nb<=nb_max:
+            paquets_filtres.append(p)
+    return paquets_filtres
+
+res=0.7 #résolution angulaire. elle est normalement de 0.788 mais on en est pas sûr. à remplacer si plus d'information sur la précision angulaire
 
 def voisins(eps,points):
     paquets=[]
     traite=[]
-    a_traite=[]
+    a_traiter=[]
     for p in points:
         if p not in traite:
-            a_traite.append(p)
+            a_traiter.append(p)
             g=[]
-            while a_traite !=[]:
-                i=a_traite.pop()
+            while a_traiter !=[]:
+                i=a_traiter.pop()
                 traite.append(i)
                 g.append(i)
                 for j in points:
                     if j not in traite:
-                        if j not in a_traite:
+                        if j not in a_traiter:
                             if distance(i,j)< eps :
-                                a_traite.append(j)
+                                a_traiter.append(j)
             paquets.append(Paquet(g))
     return paquets
 
-def trouver_balises(paquets, eps=100):
+def trouver_balises(paquets, eps=250):
     for p in paquets:
         for i in paquets:
             if abs(distance(p.centre,i.centre)-np.sqrt(3000**2+1000**2))<eps:
@@ -69,4 +79,5 @@ if __name__ == "__main__":
     points=[Point(A[i],D[i],Q[i]) for i in range(len(A))]
     points_propres=filtre_points(points)                       
     paquets=voisins(50,points_propres)
+    paquets_filtres=filtre_paquets(paquets,res)
 
