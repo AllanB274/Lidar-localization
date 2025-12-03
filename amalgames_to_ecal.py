@@ -56,7 +56,7 @@ class LidarWatcher:
     def send_data_balises(self, balises):
         # balises : paquet tuple
         balise = lidar_pb.Balises()
-        for i, bal in enumerate(balises):
+        for i, bal in enumerate(balises[:-1]):
             balise.index.extend([i+1])
             balise.x.extend([bal.centre.x])
             balise.y.extend([bal.centre.y])

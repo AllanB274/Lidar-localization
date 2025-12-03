@@ -70,10 +70,10 @@ def trouver_balises(paquets, eps=250):
                         djp = distance(j.centre, p.centre)
                         if abs(dij-np.sqrt(3000**2+1000**2))<eps:
                             if abs(djp-2000)<eps:
-                                balises.append(p,i,j, abs(dij-np.sqrt(3000**2+1000**2))+abs(djp-2000))
+                                balises.append((p,i,j, abs(dij-np.sqrt(3000**2+1000**2))+abs(djp-2000)))
                         elif abs(dij-2000)<eps:
                             if abs(djp-np.sqrt(3000**2+1000**2))<eps:
-                                balises.append(p,i,j, abs(djp-np.sqrt(3000**2+1000**2))+abs(dij-2000))
+                                balises.append((p,i,j, abs(djp-np.sqrt(3000**2+1000**2))+abs(dij-2000)))
     return None if len(balises)==0 else balises
 
 def rectangulisation(balises):
@@ -83,6 +83,8 @@ def rectangulisation(balises):
         return np.matrix([[np.cos(theta), np.sin(theta)], [-np.sin(theta), np.cos(theta)]])
     
     distances = []
+    # on ne considère pas la distance ici
+    balises = balises[:-1]
     for b in balises:
         for bb in balises:
             if b!=bb:
@@ -92,8 +94,8 @@ def rectangulisation(balises):
     theta = np.asin(d/2/r)      # angle de rotation a effectuer
     rotated = R(theta)@np.matrix([[b.centre.x for b in balises], [b.centre.y for b in balises]])
     rotated = np.array(rotated)
-    minx, maxx = min(rr[0]), max(rr[0])
-    miny, maxy = min(rr[1]), max(rr[1])
+    minx, maxx = min(rotated[0]), max(rotated[0])
+    miny, maxy = min(rotated[1]), max(rotated[1])
     return (minx, maxx, miny, maxy)
 
 def robot_in_balises(balises):
