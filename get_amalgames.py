@@ -59,9 +59,10 @@ def voisins(eps,points):
 
 def trouver_balises(paquets, eps=250):
     def in_triangle(p,i,j):
-        a=p.angle
-        b=i.angle
-        c=j.angle
+        L=sorted([p,i,j], key=lambda x : x.dist)
+        a=L[0].angle
+        b=L[1].angle
+        c=L[2].angle
     return ((b-a)-180)*((c-a)-180)<0
     for p in paquets:
         for i in paquets:
@@ -87,5 +88,6 @@ if __name__ == "__main__":
     points_propres=filtre_points(points)                       
     paquets=voisins(50,points_propres)
     paquets_filtres=filtre_paquets(paquets,res)
+
 
 
