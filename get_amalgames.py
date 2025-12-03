@@ -58,6 +58,11 @@ def voisins(eps,points):
     return paquets
 
 def trouver_balises(paquets, eps=250):
+    def in_triangle(p,i,j):
+        a=p.angle
+        b=i.angle
+        c=j.angle
+    return ((b-a)-180)*((c-a)-180)<0
     for p in paquets:
         for i in paquets:
             if abs(distance(p.centre,i.centre)-np.sqrt(3000**2+1000**2))<eps:
@@ -65,10 +70,12 @@ def trouver_balises(paquets, eps=250):
                     if j!=p and j!=i:
                         if abs(distance(i.centre,j.centre)-np.sqrt(3000**2+1000**2))<eps:
                             if abs(distance(j.centre,p.centre)-2000)<eps:
-                                return(p,i,j)
+                                if in_triangle(p,i,j):
+                                    return(p,i,j)
                         elif abs(distance(i.centre,j.centre)-2000)<eps:
                             if abs(distance(j.centre,p.centre)-np.sqrt(3000**2+1000**2))<eps:
-                                return (p,i,j)
+                                if in_triangle(p,i,j):
+                                    return (p,i,j)
     return None
 
 if __name__ == "__main__":
@@ -80,4 +87,5 @@ if __name__ == "__main__":
     points_propres=filtre_points(points)                       
     paquets=voisins(50,points_propres)
     paquets_filtres=filtre_paquets(paquets,res)
+
 
