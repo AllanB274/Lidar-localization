@@ -63,7 +63,7 @@ def trouver_balises(paquets, eps=250):
         a=L[0].angle
         b=L[1].angle
         c=L[2].angle
-    return ((b-a)-180)*((c-a)-180)<0
+        return ((b-a)-180)*((c-a)-180)<0
     for p in paquets:
         for i in paquets:
             if abs(distance(p.centre,i.centre)-np.sqrt(3000**2+1000**2))<eps:
@@ -88,6 +88,7 @@ if __name__ == "__main__":
     points_propres=filtre_points(points)                       
     paquets=voisins(50,points_propres)
     paquets_filtres=filtre_paquets(paquets,res)
+
 
 
 
