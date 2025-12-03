@@ -1,1 +1,2 @@
 eclipse-ecal
+PyQt6
