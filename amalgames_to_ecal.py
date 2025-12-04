@@ -4,7 +4,7 @@ from ecal.msg.proto.core import Publisher as ProtobufPublisher
 import lidar_data_pb2 as lidar_pb
 from ecal.msg.common.core import ReceiveCallbackData
 import time
-from get_amalgames import Point, filtre_points, voisins, trouver_balises, filtre_paquets, choix_balises
+from get_amalgames import Point, filtre_points, voisins, trouver_balises, filtre_paquets
 
 class LidarWatcher:
     def __init__(self):
@@ -36,7 +36,7 @@ class LidarWatcher:
         points_propres=filtre_points(points)                       
         paquets=voisins(100,points_propres)
         paquets_filtres=filtre_paquets(paquets,res)
-        balises_list=trouver_balises(paquets_filtres)
+        balises=trouver_balises(paquets_filtres)
         self.send_data_amal(paquets)
         if balises!=None:
             self.send_data_balises(balises)
