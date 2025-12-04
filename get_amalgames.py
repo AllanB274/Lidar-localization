@@ -58,7 +58,6 @@ def voisins(eps,points):
     return paquets
 
 def robot_in_balises(balises):
-    
     def R(theta):
         # Matrice de rotation dans le sens inverse (peu importe)
         return np.matrix([[np.cos(theta), np.sin(theta)], [-np.sin(theta), np.cos(theta)]])
@@ -100,6 +99,7 @@ def trouver_balises(paquets, eps=250):
                                 if robot_in_balises((p,i,j)):
                                     return(p,i,j,k)
     return None
+
 
 
 
