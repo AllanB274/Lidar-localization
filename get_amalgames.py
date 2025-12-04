@@ -62,7 +62,7 @@ def robot_in_balises(balises):
     def R(theta):
         # Matrice de rotation dans le sens inverse (peu importe)
         return np.matrix([[np.cos(theta), np.sin(theta)], [-np.sin(theta), np.cos(theta)]])
-for i in balises:
+    for i in balises:
         for j in balises:
             if i!=j:
                 if (distance(i.centre,j.centre)-2000)<200:
@@ -100,5 +100,6 @@ def trouver_balises(paquets, eps=250):
                                 if robot_in_balises((p,i,j)):
                                     return(p,i,j,k)
     return None
+
 
 
