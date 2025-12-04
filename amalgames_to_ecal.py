@@ -37,7 +37,6 @@ class LidarWatcher:
         paquets=voisins(100,points_propres)
         paquets_filtres=filtre_paquets(paquets,res)
         balises_list=trouver_balises(paquets_filtres)
-        balises=choix_balises(balises_list)
         self.send_data_amal(paquets)
         if balises!=None:
             self.send_data_balises(balises)
@@ -67,4 +66,5 @@ if __name__ == "__main__":
         while ecal_core.ok():
 
             time.sleep(0.5)
+
 
