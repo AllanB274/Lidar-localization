@@ -62,14 +62,17 @@ def robot_in_balises(balises):
     def R(theta):
         # Matrice de rotation dans le sens inverse (peu importe)
         return np.matrix([[np.cos(theta), np.sin(theta)], [-np.sin(theta), np.cos(theta)]])
-    distances = []
-    for b in balises:
-        for bb in balises:
-            if b!=bb:
-                distances.append(distance(b.centre, bb.centre))
-    d = min(distances)          # base du triangle
-    r = (sum(distances)-d)/2    # moyenne des deux autres côtés (censé être égaux car isocèle)
-    theta = np.asin(d/2/r)      # angle de rotation a effectuer
+for i in balises:
+        for j in balises:
+            if i!=j:
+                if (distance(i.centre,j.centre)-2000)<200:
+                    a,b=i,j #la base
+        for k in balises:
+            if k!=a and k!=b:
+                c=k #le sommet du triangle
+    delta_x=abs(np.mean([a.centre.x,b.centre.x])-c.centre.x)
+    delta_y=abs(np.mean([a.centre.y,b.centre.y])-c.centre.y)
+    theta=np.arctan(delta_y/delta_x)
     rotated = R(theta)@np.matrix([[b.centre.x for b in balises], [b.centre.y for b in balises]])
     rotated = np.array(rotated)
     minx, maxx = min(rotated[0]), max(rotated[0])
@@ -97,4 +100,5 @@ def trouver_balises(paquets, eps=250):
                                 if robot_in_balises((p,i,j)):
                                     return(p,i,j,k)
     return None
+
 
