@@ -4,7 +4,7 @@ from ecal.msg.proto.core import Publisher as ProtobufPublisher
 import lidar_data_pb2 as lidar_pb
 from ecal.msg.common.core import ReceiveCallbackData
 import time
-from get_amalgames import Point, filtre_points, voisins, trouver_balises, filtre_paquets, choix_balises
+from get_amalgames import Point, filtre_points, voisins, trouver_balises, filtre_paquets
 
 class LidarWatcher:
     def __init__(self):
@@ -66,5 +66,6 @@ if __name__ == "__main__":
         while ecal_core.ok():
 
             time.sleep(0.5)
+
 
 
