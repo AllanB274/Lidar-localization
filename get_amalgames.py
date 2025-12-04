@@ -1,6 +1,6 @@
 import numpy as np
 
-class Point():
+class Point:
     def __init__(self,angle,distance,qualite):
         self.angle=angle
         self.dist=distance
@@ -8,7 +8,7 @@ class Point():
         self.x=distance*np.cos(angle)
         self.y=distance*np.sin(angle)
         
-class Paquet():
+class Paquet:
     def __init__(self,L):
         self.nb=len(L)
         self.centre=Point(np.mean([p.angle for p in L]),np.mean([p.dist for p in L]),255)
@@ -97,3 +97,4 @@ def trouver_balises(paquets, eps=250):
                                 if robot_in_balises((p,i,j)):
                                     return(p,i,j,k)
     return None
+
