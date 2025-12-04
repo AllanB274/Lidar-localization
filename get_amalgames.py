@@ -67,9 +67,9 @@ def robot_in_balises(balises):
             if i!=j:
                 if (distance(i.centre,j.centre)-2000)<200:
                     a,b=i,j #la base
-        for k in balises:
-            if k!=a and k!=b:
-                c=k #le sommet du triangle
+    for k in balises:
+        if k!=a and k!=b:
+            c=k #le sommet du triangle
     delta_x=abs(np.mean([a.centre.x,b.centre.x])-c.centre.x)
     delta_y=abs(np.mean([a.centre.y,b.centre.y])-c.centre.y)
     theta=np.arctan(delta_y/delta_x)
@@ -100,6 +100,7 @@ def trouver_balises(paquets, eps=250):
                                 if robot_in_balises((p,i,j)):
                                     return(p,i,j,k)
     return None
+
 
 
 
