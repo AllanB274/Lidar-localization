@@ -58,18 +58,17 @@ def voisins(eps,points):
     return paquets
 
 def robot_in_balises(balises):
-    
     def R(theta):
         # Matrice de rotation dans le sens inverse (peu importe)
         return np.matrix([[np.cos(theta), np.sin(theta)], [-np.sin(theta), np.cos(theta)]])
-    distances = []
-    for b in balises:
-        for bb in balises:
-            if b!=bb:
-                distances.append((distance(b.centre, bb.centre), b, bb))
-    a, b = min(distances, key=lambda x: x[0])[1:]
-    long_side = max(distances, key=lambda x: x[0])[1:]
-    c = long_side[0] if long_side[0]!=a and long_side[0]!=b else long_side[1]
+    for i in balises:
+        for j in balises:
+            if i!=j:
+                if (distance(i.centre,j.centre)-2000)<350:
+                    a,b=i,j #la base
+    for k in balises:
+        if k!=a and k!=b:
+            c=k #le sommet du triangle
     delta_x=abs(np.mean([a.centre.x,b.centre.x])-c.centre.x)
     delta_y=abs(np.mean([a.centre.y,b.centre.y])-c.centre.y)
     theta=np.arctan(delta_y/delta_x)
@@ -100,4 +99,8 @@ def trouver_balises(paquets, eps=250):
                                 if robot_in_balises((p,i,j)):
                                     return(p,i,j,k)
     return None
+
+
+
+
 
