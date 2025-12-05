@@ -16,18 +16,11 @@ class Point:
             raise("Pb get_amalgames.py Point()")
         self.qualite=qualite
         
-    def __init__(self, x, y, qualite):
-        self.x=x
-        self.y=y
-        self.qualite=qualite
-        self.angle=np.arctan(y/x)
-        self.dist=np.sqrt(x**2+y**2)
-        
 class Paquet:
     def __init__(self,L):
         self.nb=len(L)
         self.centre=Point(angle=np.mean([p.angle for p in L]),distance=np.mean([p.dist for p in L]),qualite=255)
-        self.size=max([distance(p,self.centre) for p in L])
+        self.size=max([distance(p,self.centre) for p in L]) if len(L)>0 else 0
 
         
 def distance(p1,p2):
@@ -98,7 +91,7 @@ def robot_in_balises(balises, return_rotated=False):
             p.size = balises[i].size
             rotateds.append(p)
             
-        return rotated
+        return rotateds
     minx, maxx = min(rotated[0]), max(rotated[0])
     miny, maxy = min(rotated[1]), max(rotated[1])
     return minx*maxx<0 and miny*maxy<0

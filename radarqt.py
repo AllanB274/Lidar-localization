@@ -41,13 +41,13 @@ class RadarView(QtWidgets.QWidget):
             self.lidar_balises_nearodom_sub = ProtoSubscriber(pbl.Balises, "balises_near_odom")
             self.lidar_balises_nearodom_sub.set_receive_callback(self.handle_balises_nearodom_data)
             self.lidar_balises_rotated_sub = ProtoSubscriber(pbl.Balises, "balises_rotated")
-            self.lidar_balises_rotated_sub.set_receive_callback(self.handle_balises_rotated)     
+            self.lidar_balises_rotated_sub.set_receive_callback(self.handle_balises_rotated_data)     
 
         self.lidar_data_sig.connect(self.lidar_cb)
         self.amalgame_sig.connect(self.lidar_amalgame_cb)
         self.balises_odom_sig.connect(self.lidar_balise_odom_cd)
         self.balises_nearodom_sig.connect(self.lidar_balise_nearodom_cd)
-        self.balises_rotated_sig.connect(self.lidar_balise_rotated_cd)
+        self.balises_rotated_sig.connect(self.lidar_rotated_cd)
 
         self.data = []
         self.amalgame_data = []
