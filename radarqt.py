@@ -23,6 +23,7 @@ class RadarView(QtWidgets.QWidget):
     amalgame_sig = pyqtSignal(list)
     balises_odom_sig=pyqtSignal(list)
     balises_nearodom_sig=pyqtSignal(list)
+    balises_rotated_sig=pyqtSignal(list)
     transforms_sig=pyqtSignal(list)
 
     def __init__(self, args, parent=None):
@@ -38,17 +39,21 @@ class RadarView(QtWidgets.QWidget):
             self.lidar_balises_odom_sub = ProtoSubscriber(pbl.Balises, "balises_odom")
             self.lidar_balises_odom_sub.set_receive_callback(self.handle_balises_odom_data)
             self.lidar_balises_nearodom_sub = ProtoSubscriber(pbl.Balises, "balises_near_odom")
-            self.lidar_balises_nearodom_sub.set_receive_callback(self.handle_balises_nearodom_data)  
+            self.lidar_balises_nearodom_sub.set_receive_callback(self.handle_balises_nearodom_data)
+            self.lidar_balises_rotated_sub = ProtoSubscriber(pbl.Balises, "balises_rotated")
+            self.lidar_balises_rotated_sub.set_receive_callback(self.handle_balises_rotated)     
 
         self.lidar_data_sig.connect(self.lidar_cb)
         self.amalgame_sig.connect(self.lidar_amalgame_cb)
         self.balises_odom_sig.connect(self.lidar_balise_odom_cd)
         self.balises_nearodom_sig.connect(self.lidar_balise_nearodom_cd)
+        self.balises_rotated_sig.connect(self.lidar_balise_rotated_cd)
 
         self.data = []
         self.amalgame_data = []
         self.balise_odom_data=[]
         self.nearodom_data=[]
+        self.balise_rotated_data=[]
         self.transforms_data=[]
         self.back = []
         self.last_tour_time = time.time()
@@ -95,6 +100,10 @@ class RadarView(QtWidgets.QWidget):
         self.nearodom_data=nearodom_data
         self.update()
     
+    def lidar_rotated_cd(self, balise_rotated_data):
+        self.balise_rotated_data=balise_rotated_data
+        self.update()
+    
     def handle_lidar_data(self, pub_id : ecal_core.TopicId, msg : ReceiveCallbackData[pbl.Lidar]):
         now = time.time()
         dt = now - self.last_tour_time
@@ -117,6 +126,9 @@ class RadarView(QtWidgets.QWidget):
         data = list(zip(data.message.index,data.message.x,data.message.y))    
         self.balises_nearodom_sig.emit(data)
 
+    def handle_balises_rotated_data(self, pub_id : ecal_core.TopicId, data : ReceiveCallbackData[pbl.Balises]):
+        data = list(zip(data.message.index,data.message.x,data.message.y))    
+        self.balises_rotated_sig.emit(data)
 
     def mousePressEvent(self, a0: QtGui.QMouseEvent) -> None:
         self.data = []
@@ -245,7 +257,31 @@ class RadarView(QtWidgets.QWidget):
             painter.drawText(
                 QtCore.QPointF(pos.x() + 10, pos.y() - 10),
                 str(index))
+        # Position rotationée des balises
+        painter.setPen(QtGui.QColor("green"))
+        pen = QtGui.QPen(QtGui.QColor("green"))
+        pen.setWidth(4)
+        painter.setPen(pen)
+        for index,x,y in self.balise_rotated_data:
+            pos = QtCore.QPointF(self.mm_to_pixel * x, -self.mm_to_pixel * y)
+            size = 8    
+            # print('estimation : ',index,x,x)
+            painter.drawEllipse(pos, TOLERANCE*self.mm_to_pixel, TOLERANCE*self.mm_to_pixel)
+            # Ligne horizontale
+            painter.drawLine(
+                QtCore.QPointF(pos.x() - size, pos.y()),
+                QtCore.QPointF(pos.x() + size, pos.y())
+            )
 
+            # Ligne verticale
+            painter.drawLine(
+                QtCore.QPointF(pos.x(), pos.y() - size),
+                QtCore.QPointF(pos.x(), pos.y() + size)
+            )
+            painter.setFont(font)
+            painter.drawText(
+                QtCore.QPointF(pos.x() + 10, pos.y() - 10),
+                str(index))
 
 
 

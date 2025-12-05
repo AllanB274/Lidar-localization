@@ -4,7 +4,7 @@ from ecal.msg.proto.core import Publisher as ProtobufPublisher
 import lidar_data_pb2 as lidar_pb
 from ecal.msg.common.core import ReceiveCallbackData
 import time
-from get_amalgames import Point, filtre_points, voisins, trouver_balises, filtre_paquets
+from get_amalgames import Point, filtre_points, voisins, trouver_balises, filtre_paquets, robot_in_balises
 
 class LidarWatcher:
     def __init__(self):
@@ -23,6 +23,7 @@ class LidarWatcher:
         
         self.pub_balise = ProtobufPublisher[lidar_pb.Balises](lidar_pb.Balises, "balises_near_odom")
 
+        self.pub_balise_rota = ProtobufPublisher[lidar_pb.Balises](lidar_pb.Balises, "balises_rotated")
     def __enter__(self):
         return self
     
@@ -32,14 +33,17 @@ class LidarWatcher:
 
     def data_callback(self, pub_id : ecal_core.TopicId, data : ReceiveCallbackData[lidar_pb.Lidar]) -> None:
         res=0.7 #resolution angulaire mais celle calculée est de 0.788 donc à voir
-        points=[Point(data.message.angles[i], data.message.distances[i], data.message.quality[i]) for i in range(len(data.message.distances))]
+        points=[Point(angle=data.message.angles[i], distance=data.message.distances[i], qualite=data.message.quality[i]) for i in range(len(data.message.distances))]
         points_propres=filtre_points(points)                       
         paquets=voisins(100,points_propres)
         paquets_filtres=filtre_paquets(paquets,res)
         balises=trouver_balises(paquets_filtres)
         self.send_data_amal(paquets)
         if balises!=None:
-            self.send_data_balises(balises)
+            self.send_data_balises(balises, self.pub_balise)
+            rotated = robot_in_balises(balises, True)
+            self.send_data_balises(rotated, self.pub_balise_rota)
+                
 
     def send_data_amal(self, paquets):
         """Send a LIDAR data message"""
@@ -52,14 +56,14 @@ class LidarWatcher:
         self.pub_amal.send(amal)
         # print(f"{len(paquets)} data sent to ecal!")
         
-    def send_data_balises(self, balises):
+    def send_data_balises(self, balises, pub):
         # balises : paquet tuple
         balise = lidar_pb.Balises()
         for i, bal in enumerate(balises):
             balise.index.extend([i+1])
             balise.x.extend([bal.centre.x])
             balise.y.extend([bal.centre.y])
-        self.pub_balise.send(balise)
+        pub.send(balise)
 
 if __name__ == "__main__":
     with LidarWatcher() as lw:
