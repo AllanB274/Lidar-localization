@@ -36,7 +36,7 @@ def recon(lbalises):
         return baliseref(lpol[1],lpol[2],lbalises[1],lbalises[2])
 
 
-def GPS(lbalises, coorbaliseref):
+def GPS(lbalises, coorbaliseref=(-1.5,1.0)):
     """Retourne les coordonnées GPS du robot dans le référentiel de la table, (0,0) est le centre.
     
     Entrées :
@@ -49,6 +49,7 @@ def GPS(lbalises, coorbaliseref):
     """
     xy = recon(lbalises)
     return (coorbaliseref[0]-xy[0],coorbaliseref[1]-xy[1])
+
 
 
 
