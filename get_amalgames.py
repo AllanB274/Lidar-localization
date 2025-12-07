@@ -1,18 +1,26 @@
 import numpy as np
 
 class Point:
-    def __init__(self,angle,distance,qualite):
-        self.angle=angle
-        self.dist=distance
+    def __init__(self,angle=None,distance=None,qualite=None,x=None,y=None):
+        if angle!=None and distance!=None:
+            self.angle=angle
+            self.dist=distance
+            self.x=distance*np.cos(angle)
+            self.y=distance*np.sin(angle)
+        elif x!=None and y!=None:
+            self.x=x
+            self.y=y
+            self.angle=np.arctan(y/x)
+            self.dist=np.sqrt(x**2+y**2)
+        else:
+            raise("Pb get_amalgames.py Point()")
         self.qualite=qualite
-        self.x=distance*np.cos(angle)
-        self.y=distance*np.sin(angle)
         
 class Paquet:
     def __init__(self,L):
         self.nb=len(L)
-        self.centre=Point(np.mean([p.angle for p in L]),np.mean([p.dist for p in L]),255)
-        self.size=max([distance(p,self.centre) for p in L])
+        self.centre=Point(angle=np.mean([p.angle for p in L]),distance=np.mean([p.dist for p in L]),qualite=255)
+        self.size=max([distance(p,self.centre) for p in L]) if len(L)>0 else 0
 
         
 def distance(p1,p2):
@@ -57,7 +65,7 @@ def voisins(eps,points):
             paquets.append(Paquet(g))
     return paquets
 
-def robot_in_balises(balises):
+def robot_in_balises(balises, return_rotated=False):
     def R(theta):
         # Matrice de rotation dans le sens inverse (peu importe)
         return np.matrix([[np.cos(theta), np.sin(theta)], [-np.sin(theta), np.cos(theta)]])
@@ -74,6 +82,16 @@ def robot_in_balises(balises):
     theta=np.arctan(delta_y/delta_x)
     rotated = R(theta)@np.matrix([[b.centre.x for b in balises], [b.centre.y for b in balises]])
     rotated = np.array(rotated)
+    if return_rotated:
+        rotateds = []
+        for i in range(len(rotated[0])):
+            p = Paquet([])
+            p.nb=1
+            p.centre = Point(x=rotated[0][i], y=rotated[1][i], qualite=255)
+            p.size = balises[i].size
+            rotateds.append(p)
+            
+        return rotateds
     minx, maxx = min(rotated[0]), max(rotated[0])
     miny, maxy = min(rotated[1]), max(rotated[1])
     return minx*maxx<0 and miny*maxy<0
@@ -99,7 +117,6 @@ def trouver_balises(paquets, eps=250):
                                 if robot_in_balises((p,i,j)):
                                     return(p,i,j,k)
     return None
-
 
 
 
