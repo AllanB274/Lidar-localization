@@ -5,6 +5,7 @@ import lidar_data_pb2 as lidar_pb
 from ecal.msg.common.core import ReceiveCallbackData
 import time
 from get_amalgames import Point, filtre_points, voisins, trouver_balises, filtre_paquets
+from GPS import GPS
 
 class LidarWatcher:
     def __init__(self):
@@ -37,6 +38,8 @@ class LidarWatcher:
         paquets=voisins(100,points_propres)
         paquets_filtres=filtre_paquets(paquets,res)
         balises=trouver_balises(paquets_filtres)
+        lbalises=[(b.centre.x,b.centre.y) for b in balises)]
+        print(GPS(lbalises=lbalises))
         self.send_data_amal(paquets)
         if balises!=None:
             self.send_data_balises(balises)
@@ -66,6 +69,7 @@ if __name__ == "__main__":
         while ecal_core.ok():
 
             time.sleep(0.5)
+
 
 
 
