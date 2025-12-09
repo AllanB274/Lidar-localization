@@ -106,17 +106,19 @@ def trouver_balises(paquets, eps=250):
                 if abs(d-e)<eps:
                     X.remove(e)
         return len(X)==0
-    
+    d1=np.sqrt(3000**2+1000**2) #distance longue entre balises
+    d2=2000 #distance courte entre balises
     for p in paquets:
         for i in paquets:
-            if abs(distance(p.centre,i.centre)-np.sqrt(3000**2+1000**2))<eps:
+            if abs(distance(p.centre,i.centre)-d1)<eps:
                 for j in paquets:
-                    if bonne_distance(j,[p,i],[2000,np.sqrt(3000**2+1000**2)],eps):
+                    if bonne_distance(j,[p,i],[d2,d1],eps):
                         for k in paquets:
                             if bonne_distance(k,[p,i,j],[1300,np.sqrt(1000**2+1700**2),np.sqrt(2000**2+1300**2)],eps):
                                 if robot_in_balises((p,i,j)):
                                     return[p,i,j,k]
     return None
+
 
 
 
