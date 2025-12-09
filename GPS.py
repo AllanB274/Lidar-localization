@@ -10,13 +10,13 @@ def distpol(r1,r2,theta):
 
 #Détermine les coordonnées de la balise de référence dans le référentiel du robot
 def baliseref(bal1,bal2,balxy1,balxy2):
-    if bal1[1]*bal2[1] < 0 and abs(bal1[1]*bal2[1]) > (np.pi**2)/4:
-        if max(bal1[1],bal2[1]) == bal1[1]:
+    if abs(bal1[1]*bal2[1]) > 3*(np.pi**2)/4:
+        if min(bal1[1],bal2[1]) == bal1[1]:
             return balxy1
         else:
             return balxy2
     else:
-        if min(bal1[1],bal2[1]) == bal1[1]:
+        if max(bal1[1],bal2[1]) == bal1[1]:
             return balxy1
         else:
             return balxy2
@@ -49,6 +49,7 @@ def GPS(lbalises, coorbaliseref=(-1.5,1.0)):
     """
     xy = recon(lbalises)
     return (coorbaliseref[0]-xy[0],coorbaliseref[1]-xy[1])
+
 
 
 
