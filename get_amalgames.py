@@ -115,8 +115,9 @@ def trouver_balises(paquets, eps=250):
                         for k in paquets:
                             if bonne_distance(k,[p,i,j],[1300,np.sqrt(1000**2+1700**2),np.sqrt(2000**2+1300**2)],eps):
                                 if robot_in_balises((p,i,j)):
-                                    return(p,i,j,k)
+                                    return[p,i,j,k]
     return None
+
 
 
 
