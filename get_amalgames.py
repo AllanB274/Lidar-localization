@@ -69,16 +69,10 @@ def robot_in_balises(balises, return_rotated=False):
     def R(theta):
         # Matrice de rotation dans le sens inverse (peu importe)
         return np.matrix([[np.cos(theta), np.sin(theta)], [-np.sin(theta), np.cos(theta)]])
-    for i in balises:
-        for j in balises:
-            if i!=j:
-                if (distance(i.centre,j.centre)-2000)<350:
-                    a,b=i,j #la base
-    for k in balises:
-        if k!=a and k!=b:
-            c=k #le sommet du triangle
-    delta_x=abs(np.mean([a.centre.x,b.centre.x])-c.centre.x)
-    delta_y=abs(np.mean([a.centre.y,b.centre.y])-c.centre.y)
+    (s,b1,b2)=(balises[1],balises[0],balises[2]) #sommet, balise en haut, balise en bas
+    m=Point(qualite=255,x=np.mean([b1.centre.x,b2.centre.x]),y=np.mean([b1.centre.y,b2.centre.y]))    #milieu du segment (b1,b2)
+    delta_x=abs(m.x-s.centre.x)
+    delta_y=abs(m.y-s.centre.y)
     theta=np.arctan(delta_y/delta_x)
     rotated = R(theta)@np.matrix([[b.centre.x for b in balises], [b.centre.y for b in balises]])
     rotated = np.array(rotated)
@@ -115,8 +109,8 @@ def trouver_balises(paquets, eps=250):
                     if bonne_distance(j,[p,i],[d2,d1],eps):
                         for k in paquets:
                             if bonne_distance(k,[p,i,j],[1300,np.sqrt(1000**2+1700**2),np.sqrt(2000**2+1300**2)],eps):
-                                if robot_in_balises((p,i,j)):
-                                    triangle=sorted([p,i,j], key=lambda x: distance(x.centre,k.centre))
+                                triangle=sorted([p,i,j], key=lambda x: distance(x.centre,k.centre))
+                                if robot_in_balises(balises=triangle):
                                     return triangle+[k]
     return None
 
