@@ -10,6 +10,7 @@ from ecal.msg.proto.core import Subscriber as ProtoSubscriber
 from ecal.msg.proto.core import Publisher as ProtoPublisher
 from ecal.msg.common.core import ReceiveCallbackData
 import lidar_data_pb2  as pbl
+import numpy as np
 
 TOLERANCE = 500
 
@@ -101,7 +102,7 @@ class RadarView(QtWidgets.QWidget):
         self.last_tour_time = now
         self.period = self.period*0.4 + dt * 0.6   # passe bas
 
-        data = list(zip(msg.message.angles, msg.message.distances, msg.message.quality))
+        data = list(zip(np.array(msg.message.angles)+np.pi/2, msg.message.distances, msg.message.quality))
         self.lidar_data_sig.emit(data)
     
     def handle_amalgames_data(self, pub_id : ecal_core.TopicId, data : ReceiveCallbackData[pbl.Amalgames]):
