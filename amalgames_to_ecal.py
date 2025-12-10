@@ -6,6 +6,7 @@ from ecal.msg.common.core import ReceiveCallbackData
 import time
 from get_amalgames import Point, filtre_points, voisins, trouver_balises, filtre_paquets
 from GPS import GPS
+import numpy as np
 
 class LidarWatcher:
     def __init__(self):
@@ -33,7 +34,7 @@ class LidarWatcher:
 
     def data_callback(self, pub_id : ecal_core.TopicId, data : ReceiveCallbackData[lidar_pb.Lidar]) -> None:
         res=0.7 #resolution angulaire mais celle calculée est de 0.788 donc à voir
-        points=[Point(data.message.angles[i], data.message.distances[i], data.message.quality[i]) for i in range(len(data.message.distances))]
+        points=[Point(angle=data.message.angles[i]+np.pi/2, distance=data.message.distances[i], qualite=data.message.quality[i]) for i in range(len(data.message.distances))]
         points_propres=filtre_points(points)                       
         paquets=voisins(100,points_propres)
         paquets_filtres=filtre_paquets(paquets,res)
@@ -69,9 +70,6 @@ if __name__ == "__main__":
         while ecal_core.ok():
 
             time.sleep(0.5)
-
-
-
 
 
 
