@@ -5,8 +5,8 @@ class Point:
         if angle!=None and distance!=None:
             self.angle=angle
             self.dist=distance
-            self.x=distance*-1*np.sin(angle)
-            self.y=distance*np.cos(angle)
+            self.x=distance*np.cos(angle)
+            self.y=distance*np.sin(angle)
         elif x!=None and y!=None:
             self.x=x
             self.y=y
@@ -113,6 +113,7 @@ def trouver_balises(paquets, eps=250):
                                 if robot_in_balises(balises=triangle):
                                     return triangle+[k]
     return None
+
 
 
 
