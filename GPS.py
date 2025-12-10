@@ -1,23 +1,25 @@
-#Prend la liste des coordonnées des balises dont l'ordre a déjà été trouvé, ça fait la moyenne des 3 coordonnées calculées avec chacune des balises (j'ai mis dans le référentiel où le 0,0 est dans le coin de la table)
-from get_amalgame import Paquet, Point
 
-def coordonnees_balises(L):
+
+from get_amalgames import Paquet, Point
+import numpy as np
+
+def projeter_balises(L):
     def projeter(l,theta):
+        coord=[]
         for b in l:
-            b.centre.x=b.centre.distance*np.cos(theta)
-            b.centre.y=b.centre.distance*np.sin(theta)
-        return l
-    theta=2*np.pi-L[1].centre.angle
+            x=b.centre.x*np.cos(theta)-b.centre.y*np.sin(theta)   #on rotationne
+            y=b.centre.y*np.cos(theta)+b.centre.x*np.sin(theta)
+            coord.append((x,y))
+        return coord
+    theta=-L[1].centre.angle        # l'angle entre la base table et la base robot
     return projeter(L,theta)
     
 
 
-def GPS(balises_proj):
-    (b1,b2,b3)=(balises_proj[0],balises_proj[1],balises_proj[2])
-    mx = (-b1.centre.x + 3.-b2.centre.y - b3.centre.x)/3
-    my = (-b1.centre.y + 1.-b2.centre.y + 2.-b3.centre.y)/3
+def GPS(C):
+    mx = (-C[0][0] + 3000.-C[1][0] - C[2][0])/3
+    my = (-C[0][1] + 1000.-C[1][1] + 2000.-C[2][1])/3
     return (mx, my)
-
 
 
 
