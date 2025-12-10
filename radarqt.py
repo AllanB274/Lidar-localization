@@ -102,7 +102,7 @@ class RadarView(QtWidgets.QWidget):
         self.last_tour_time = now
         self.period = self.period*0.4 + dt * 0.6   # passe bas
 
-        data = list(zip(np.array(msg.message.angles)+np.pi/2, msg.message.distances, msg.message.quality))
+        data = list(zip(np.array(msg.message.angles), msg.message.distances, msg.message.quality))
         self.lidar_data_sig.emit(data)
     
     def handle_amalgames_data(self, pub_id : ecal_core.TopicId, data : ReceiveCallbackData[pbl.Amalgames]):
