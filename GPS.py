@@ -13,9 +13,11 @@ def coordonnees_balises(L):
 
 
 def GPS(balises_proj):
-    mx = (-lcobal[0][0] + 3.-lcobal[1][0] - lcobal[2][0])/3
-    my = (-lcobal[0][1] + 1.-lcobal[1][1] + 2.-lcobal[2][1])/3
+    (b1,b2,b3)=(balises_proj[0],balises_proj[1],balises_proj[2])
+    mx = (-b1.centre.x + 3.-b2.centre.y - b3.centre.x)/3
+    my = (-b1.centre.y + 1.-b2.centre.y + 2.-b3.centre.y)/3
     return (mx, my)
+
 
 
 
