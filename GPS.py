@@ -1,4 +1,4 @@
-from get_amalgames import Paquet, Point,distance2
+from get_amalgames import Paquet, Point,distance
 import numpy as np
 
 def GPS(L):   #liste de balises
@@ -8,11 +8,12 @@ def GPS(L):   #liste de balises
     theta_3=abs(b1.angle-b2.angle)
     b=b1.dist
     c=b2.dist
-    a=distance2(b1,b2)
+    a=distance(b1,b2)
     alpha=np.arccos((b-c*np.cos(theta_3))/a)
     return(b*np.cos(alpha+0.322),abs(b*np.sin(alpha+0.322)))
 
 
 
             
+
 
