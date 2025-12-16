@@ -25,8 +25,7 @@ class Paquet: #ensemble de points definis par un centre et un diamètre (le diam
 
         
 def distance(p1,p2): #calcule la distance entre deux points à partir de leurs coordonnées cartésiennes
-    return np.sqrt(abs((p2.x)-(p1.x))**2+abs((p2.y)-(p1.y))**2) #vraie question, pourquoi t'as mis abs() alors que tu mets au carré après ?
-    #return np.sqrt((p2.x-p1.x)**2+(p2.y-p1.y)**2) c'est mieux comme ça bougnoulito
+    return np.sqrt((p2.x-p1.x)**2+(p2.y-p1.y)**2)
 
 def distance2(p1,p2):
     return np.sqrt(p1.dist**2+p2.dist**2-2*p1.dist*p2.dist*np.cos(p1.angle-p2.angle))
@@ -116,6 +115,7 @@ def trouver_balises(paquets, eps=250):
                                 if robot_in_balises(balises=triangle):        #si les balises contournent une table dans laquelle se trouve le robot alors c'est possiblement nos balises !
                                     return triangle+[k]                      #on renvoie une liste de 4 paquets qui sont nos balises
     return None
+
 
 
 
