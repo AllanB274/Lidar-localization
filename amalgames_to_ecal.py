@@ -33,7 +33,7 @@ class LidarWatcher:
         ecal_core.finalize()
 
     def data_callback(self, pub_id : ecal_core.TopicId, data : ReceiveCallbackData[lidar_pb.Lidar]) -> None:
-        res=0.7 #resolution angulaire mais celle calculée est de 0.788 donc à voir
+        res=0.8 #450 points pour 360 degrés
         points=[Point(angle=data.message.angles[i], distance=data.message.distances[i], qualite=data.message.quality[i]) for i in range(len(data.message.distances))]
         points_propres=filtre_points(points)                       
         paquets=voisins(100,points_propres)
@@ -69,6 +69,7 @@ if __name__ == "__main__":
         while ecal_core.ok():
 
             time.sleep(0.5)
+
 
 
 
