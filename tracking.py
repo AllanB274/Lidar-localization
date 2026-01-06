@@ -5,14 +5,18 @@ import numpy as np
 def filtre_point(L,r,a,a_balise,d_balise):
     Liste_point=[]
     for point in L:
+        #on doit verifier que les points sont biens dans le cone de tolerance et de bonne qualité
         if (point.angle-(a_balise-a/2))*(point.angle-(a_balise+a/2))<0:
             if (point.dist-(d_balise-r/2))*(point.dist-(d_balise+r/2))<0:
-                Liste_point.append(point)
+                if point.qualite>200:
+                    Liste_point.append(point)
     return Liste_point
     
 
 
 def tracking(L,pos,a_balise,r,a):
+    #voir schema pour comprendre les appélation d'angle
+    
     #L : liste de point
     #pos : ancienne position du robot
     #d_balise : ancienne distance de la balise
@@ -32,11 +36,11 @@ def tracking(L,pos,a_balise,r,a):
     d_balise_new=balise.dist
     alpha=a_balise_new-a_balise #angle duquel on s'est déplacé
     delta_d=np.sqrt(d_balise_new**2+d_balise**2-2*(d_balise_new*d_balise*np.cos(alpha))) # al kashi pour trouver la distance dont on s'est deplacer
-    phi=np.arccos(-(d_balise_new**2+delta_d**2+d_balise**2)/(2*delta_d*d_balise)) # al kashi pour trouver l'angle phi
+    phi=np.arccos((-d_balise_new**2+delta_d**2+d_balise**2)/(2*delta_d*d_balise))*(alpha/abs(alpha)) # al kashi pour trouver l'angle phi et on multiplie par le signe de alpha pour signe phi
     beta=np.arctan(y/x) #angle etre l'ax des x, la balise origine et le robot
-    theta=np.pi-phi-beta
-    delta_x=delta_d*np.cos(theta) #variation de x de déplacement
-    delta_y=delta_d*np.sin(theta) #variation de y de déplacement
+    theta=phi+beta
+    delta_x=-delta_d*np.cos(theta) #variation de x de déplacement
+    delta_y=-delta_d*np.sin(theta) #variation de y de déplacement
     
     new_x=x+delta_x #nouvelle coordonnée x
     new_y=y+delta_y #nouvelle coordonnée y
