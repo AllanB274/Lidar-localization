@@ -4,8 +4,7 @@ from ecal.msg.proto.core import Publisher as ProtobufPublisher
 import lidar_data_pb2 as lidar_pb
 from ecal.msg.common.core import ReceiveCallbackData
 import time
-from get_amalgames import Point, filtre_points, voisins, trouver_balises, filtre_paquets
-from GPS import GPS
+from GPS import Point, GPS
 import numpy as np
 
 class LidarWatcher:
@@ -35,12 +34,9 @@ class LidarWatcher:
     def data_callback(self, pub_id : ecal_core.TopicId, data : ReceiveCallbackData[lidar_pb.Lidar]) -> None:
         res=0.7 #450 points pour 360 degrés
         points=[Point(angle=data.message.angles[i], distance=data.message.distances[i], qualite=data.message.quality[i]) for i in range(len(data.message.distances))]
-        points_propres=filtre_points(points)                       
-        paquets=voisins(100,points_propres)
-        paquets_filtres=filtre_paquets(paquets,res)
-        balises=trouver_balises(paquets_filtres)
-        print(GPS(balises[:-1]))
-        self.send_data_amal(paquets)
+        resultat=GPS(points,res)
+        print(resultat[0])
+        balises=resultat[1]
         if balises!=None:
             self.send_data_balises(balises)
 
@@ -69,7 +65,6 @@ if __name__ == "__main__":
         while ecal_core.ok():
 
             time.sleep(0.5)
-
 
 
 
