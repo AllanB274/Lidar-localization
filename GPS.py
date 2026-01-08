@@ -21,7 +21,7 @@ class Paquet: #ensemble de points definis par un centre et un diamètre (le diam
     def __init__(self,L):
         self.nb=len(L)
         self.centre=Point(angle=np.mean([p.angle for p in L]),distance=np.mean([p.dist for p in L]),qualite=255) #tu définis le centre en polaire, c'est parfait
-        self.size=max([distance(p,self.centre) for p in L]) if len(L)>0 else 0
+        self.size=max([distance2(p,self.centre) for p in L]) if len(L)>0 else 0
         ### self.size=max([distance2(p,self.centre) for p in L]) if len(L)>0 else 0
 
         
@@ -65,7 +65,7 @@ def voisins(eps,points):
                     if j not in traite:       #s'ils ne sont pas déjà traités
                         if j not in a_traiter:    #s'ils ne sont pas déjà dans à traiter
                             ### if distance2(i,j)< eps :
-                            if distance(i,j)< eps :   #si le point qu'on est en train de traiter et celui-là sont suffisament proches
+                            if distance2(i,j)< eps :   #si le point qu'on est en train de traiter et celui-là sont suffisament proches
                                 a_traiter.append(j)    #on ajoute ce deuxième point dans a_traiter, sinon on passe aux points suivants
             paquets.append(Paquet(g))                    #notre groupe est maintenant un paquet qu'on ajoute à la liste des paquets
     return paquets
@@ -95,7 +95,7 @@ def trouver_balises(paquets, eps=250):
         #on prend une balise candidate et on vérifie qu'elle est aux distances souhaitées des autres balises
         for b in balises:
             ### d=distance2(j.centre,b.centre)
-            d=distance(j.centre,b.centre)
+            d=distance2(j.centre,b.centre)
             for e in X:
                 if abs(d-e)<eps:       #si la distance entre la balise candidate et la balise b déjà choisie appartient à notre liste de distances alors c'est ok et on retire la distance de la liste
                     X.remove(e)
@@ -106,13 +106,13 @@ def trouver_balises(paquets, eps=250):
     for p in paquets:     #on prend un premier point 
         for i in paquets: #on prend un deuxième point
             ### if abs(distance2(p.centre,i.centre)-d1)<eps:
-            if abs(distance(p.centre,i.centre)-d1)<eps: #si ces deux points sont à distance du grand côté du triangle :
+            if abs(distance2(p.centre,i.centre)-d1)<eps: #si ces deux points sont à distance du grand côté du triangle :
                 for j in paquets:                       # on cherche un troisième point 
                     if bonne_distance(j,[p,i],[d2,d1],eps):    # si ce-dernier est à bonne distance des deux autres:
                         for k in paquets:                      #on cherche la dernière balise
                             if bonne_distance(k,[p,i,j],[1300,np.sqrt(1000**2+1700**2),np.sqrt(2000**2+1300**2)],eps):  #si y'en a une à bonne distance des trois autres
                                 ### triangle=sorted([p,i,j], key=lambda x: distance2(x.centre,k.centre))
-                                triangle=sorted([p,i,j], key=lambda x: distance(x.centre,k.centre))        #on les trie pour les identifier. comme ça on peut retrouver laquelle est laquelle rapidement
+                                triangle=sorted([p,i,j], key=lambda x: distance2(x.centre,k.centre))        #on les trie pour les identifier. comme ça on peut retrouver laquelle est laquelle rapidement
                                 if robot_in_balises(balises=triangle):        #si les balises contournent une table dans laquelle se trouve le robot alors c'est possiblement nos balises !
                                     return triangle+[k]                      #on renvoie une liste de 4 paquets qui sont nos balises
     return None
@@ -120,14 +120,12 @@ def trouver_balises(paquets, eps=250):
 
 def trouver_position(L):   #liste de balises
     (b1,b2,b3)=(L[0].centre,L[1].centre,L[2].centre)
-    theta_1=abs(b2.angle-b3.angle)
-    theta_2=abs(b1.angle-b3.angle)
-    theta_3=abs(b1.angle-b2.angle)
+    theta=abs(b1.angle-b3.angle)
     b=b1.dist
-    c=b2.dist
-    a=distance2(b1,b2)
-    alpha=np.arccos((b-c*np.cos(theta_3))/a)
-    return(b*np.cos(alpha+0.322),abs(b*np.sin(alpha+0.322)))
+    c=b3.dist
+    a=distance2(b1,b3)
+    alpha=(np.pi/2)-np.arccos((b-c*np.cos(theta))/a)
+    return(b*np.cos(alpha),abs(b*np.sin(alpha)))
 
 def GPS(L,res):
     points_propres=filtre_points(L)                       
@@ -135,3 +133,4 @@ def GPS(L,res):
     paquets_filtres=filtre_paquets(paquets,res)
     balises=trouver_balises(paquets_filtres)
     return (trouver_position(balises[:-1]),balises)
+
