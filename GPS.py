@@ -125,7 +125,7 @@ def trouver_position(L):   #liste de balises
     c=b3.dist
     a=distance2(b1,b3)
     alpha=(np.pi/2)-np.arccos((b-c*np.cos(theta))/a)
-    return(b*np.cos(alpha),abs(b*np.sin(alpha)))
+    return (abs(b*np.cos(alpha)),abs(b*np.sin(alpha)))
 
 def GPS(L,res):
     points_propres=filtre_points(L)                       
@@ -133,4 +133,5 @@ def GPS(L,res):
     paquets_filtres=filtre_paquets(paquets,res)
     balises=trouver_balises(paquets_filtres)
     return (trouver_position(balises[:-1]),balises)
+
 
