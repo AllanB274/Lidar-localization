@@ -119,19 +119,98 @@ def trouver_balises(paquets, eps=250):
 
 
 def trouver_position(L):   #liste de balises
+
+    #je vais mettre x1,y1,x2,y2,x3,y3 en parametre
+
     (b1,b2,b3)=(L[0].centre,L[1].centre,L[2].centre)
     theta=abs(b1.angle-b3.angle)
     b=b1.dist
     c=b3.dist
     a=distance2(b1,b3)
     alpha=(np.pi/2)-np.arccos((b-c*np.cos(theta))/a)
-    return (abs(b*np.cos(alpha)),abs(b*np.sin(alpha)))
+    return(b*np.cos(alpha),abs(b*np.sin(alpha)))
+
+def trouver_position2(L):
+    (b1,b2,b3)=(L[0].centre,L[1].centre,L[2].centre)
+    
+    #les coordonnées des balises 2 et 3 (1 etant l'origine à (0,0))
+    y3=distance2(b1,b3)
+    y2=y3/2
+    x2=np.sqrt(distance2(b1,b2)**2-y2**2)
+    
+    #distance pour trilatération
+    d1=b1.dist
+    d2=b2.dist
+    d3=b3.dist 
+    y=(d1**2-d3**2+y3**2)/(2*y3)
+    x=(d1**2-d2**2+x2**2+y2**2-(2*y2*y))/(2*x2)
+    
+    return (x,y)
+    
+def bilateration(L,coord1,coord2,coord3):
+    #L = liste de balises
+    # ATTENTION x1, y1 doivent être les coordonnées de la balise d'origine (0,0)
+    # coord 1,2 et 3 sont les coordonnées théoriques des trois premières balises dans L
+    #pour l'instant x1 et y1 valent (0,0) mais je travaille sur une version plus générale
+    b1,b2,b3=L[0].centre,L[1].centre,L[2].centre
+    d1=b1.dist
+    d2=b2.dist
+    d3=b3.dist
+    (x1,y1)=coord1
+    (x2,y2)=coord2
+    (x3,y3)=coord3
+    
+    # on doit trouver les deux positions possibles du robot
+    #calcul à vérifier
+    D=np.sqrt((x2-x1)**2+(y2-y1)**2) #distance theorique entre les deux balises
+    A=np.sqrt(4*D**2*d1**2 - (d1**2 - d2**2 + D**2)**2) #terme commun aux 4 valeurs
+
+    xa  = x1 + (d1**2 - d2**2 + D**2)*(x2 - x1)/(2*D**2) + (y2 - y1)*A/(2*D**2)
+    ya  = y1 + (d1**2 - d2**2 + D**2)*(y2 - y1)/(2*D**2) - (x2 - x1)*A/(2*D**2)
+
+    xb = x1 + (d1**2 - d2**2 + D**2)*(x2 - x1)/(2*D**2) - (y2 - y1)*A/(2*D**2)
+    yb = y1 + (d1**2 - d2**2 + D**2)*(y2 - y1)/(2*D**2) + (x2 - x1)*A/(2*D**2)
+    
+    #on leve le doute sur la bonne position grâce à la troisieme balise
+    da=np.sqrt((x3-xa)**2+(y3-ya)**2)
+    db=np.sqrt((x3-xb)**2+(y3-yb)**2)   
+    if abs(da-d3)<abs(db-d3):
+        x,y=xa,ya
+    else:
+        x,y=xb,yb
+    
+    #fonction pour trouver les coordonnées des balises calculées dans le référentiel table
+    def coord_balises_pratique(p,coord_robot,a1):
+        b=p.centre
+        (x,y)=coord_robot
+        beta=np.arctan(y/x)     #angle table, robot
+        alpha=b.angle+beta+np.pi-a1    #angle de rotation
+        d=b.dist
+        xb,yb=d*np.cos(alpha),d*np.sin(alpha)
+        return (xb+x,yb+y)
+    
+    
+    balises_pratiques=[coord_balises_pratique(i,(x,y),b1.angle) for i in L]
+    
+    return [(x,y),balises_pratiques]
+    
+
+def trilateration(L,x1,y1,x2,y2,x3,y3):
+    (b1,b2,b3)=(L[0].centre,L[1].centre,L[2].centre)   #on extrait les trois balises 1,2 et 3
+    d1=b1.dist   #distances des balises au robot
+    d2=b2.dist
+    d3=b3.dist 
+    #trilateration:
+    y=((x3-x1)*(d1**2-d2**2+x2**2-x1**2+y2**2-y1**2)-(x2-x1)*(d1**2-d3**2+x3**2-x1**2+y3**2-y1**2))/(2*((x3-x1)*(y2-y1)-(x2-x1)*(y3-y1)))
+    x=(d1**2-d2**2+x2**2-x1**2+y2**2-y1**2-2*y*(y2-y1))/(2*(x2-x1))    
+    return (x,y)
+    
 
 def GPS(L,res):
-    points_propres=filtre_points(L)                       
-    paquets=voisins(100,points_propres)
-    paquets_filtres=filtre_paquets(paquets,res)
-    balises=trouver_balises(paquets_filtres)
-    return (trouver_position(balises[:-1]),balises)
-
+    points_propres=filtre_points(L)             #on filtre les points         
+    paquets=voisins(100,points_propres)         #on créé les paquets
+    paquets_filtres=filtre_paquets(paquets,res) #on filtre les paquets
+    balises=trouver_balises(paquets_filtres)    #on trouve les balises en cherchant le triangle
+    print(f"bil : {bilateration(balises,(0,0),(3000,1000),(0,2000))}")
+    return (trilateration(balises[:-1],0,0,3000,1000,0,2000),balises)   #on trilateralise
 
