@@ -1,4 +1,5 @@
-from GPS import voisins, trilateration
+from GPS import voisins, trilateration, f_least_square
+from scipy.optimize import least_squares
 
 
 def filtre_point(L,r,a,a_balise,d_balise):
@@ -42,7 +43,9 @@ def tracking(L,balises,a,r):
             new_pos=trilateration(nouvelles_balises,x1,y1,x2,y2,x3,y3)
         else :
             new_pos=trilateration(nouvelles_balises[:-1],0,0,3000,1000,0,2000) #on utilise les trois balises principales
-    return new_pos,nouvelles_balises
+    #l'implémentation ici n'est pas celle de Fabien, là c'est celle qui est plus logique où on fait le least_squares après avoir recalculé la position et pas juste à partir du least_squares
+    new_pos2 = least_squares(f_least_square, new_pos) #même problème pour ici que pour GPS
+    return new_pos2,nouvelles_balises
 
 
 
