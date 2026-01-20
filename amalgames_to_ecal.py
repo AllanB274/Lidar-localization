@@ -24,7 +24,7 @@ class LidarWatcher:
         
         self.pub_balise = ProtobufPublisher[lidar_pb.Balises](lidar_pb.Balises, "balises_near_odom")
 
-        self.pub_position = ProtobufPublisher[lidar_pb.Position](lidar_pb.Position, "robot_position")
+        self.pub_position = ProtobufPublisher[lidar_pb.Position](lidar_pb.Position, "lidar_pos")
 
     def __enter__(self):
         return self
@@ -36,9 +36,8 @@ class LidarWatcher:
     def data_callback(self, pub_id : ecal_core.TopicId, data : ReceiveCallbackData[lidar_pb.Lidar]) -> None:
         res=0.7 #450 points pour 360 degrés
         points=[Point(angle=data.message.angles[i], distance=data.message.distances[i], qualite=data.message.quality[i]) for i in range(len(data.message.distances))]
-        resultat=GPS(points,res)
-        print(resultat[0])
-        balises=resultat[1]
+        dico, balises=GPS(points,res)
+        self.send_data_position(dico["robot"])
         if balises!=None:
             self.send_data_balises(balises)
 

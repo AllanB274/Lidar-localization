@@ -1,5 +1,5 @@
 import numpy as np
-
+from scipy.optimize import least_squares
 
 class Point: #point dont les coordonnées sont definies dans le référentiel robot
     def __init__(self,angle=None,distance=None,qualite=None,x=None,y=None):
@@ -181,6 +181,6 @@ def GPS(L,res):
     paquets=voisins(100,points_propres)         #on créé les paquets
     paquets_filtres=filtre_paquets(paquets,res) #on filtre les paquets
     balises=trouver_balises(paquets_filtres)    #on trouve les balises en cherchant le triangle
-    return bilateration(balises,ptt)  #on trilateralise
+    return bilateration(balises,ptt), balises  #on trilateralise
 
 
