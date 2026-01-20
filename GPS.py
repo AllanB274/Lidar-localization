@@ -26,6 +26,8 @@ class Paquet: #ensemble de points definis par un centre et un diamètre (le diam
         ### self.size=max([distance2(p,self.centre) for p in L]) if len(L)>0 else 0
 
 def f_least_square(coordexp): #le problème c'est que la fonction ne doit avoir qu'un seul argument, donc soit on y met les coordonnées de la table, soit il faut calculer les coordonnées théoriques dans la fonction en ne prenant qu'un seul argument ou alors en mettant des variables globales mais je suis pas sûr que ça soit vraiment possible
+    # signature voulu : fun(x, *args, **kwargs) avec x des coos mesurées -> least square testera différents x sur cette fonction pour la minimiser
+    # x doit nécéssairement être un ndarray -> [b1, b2, ...], Il faut passer les coos théorique voulues dans les args alors
     lcoordstheo = [(0,0),(3,1),(0,2)]
     return [(coordsexp[0]-i[0],coordsexp[1]-i[1]) for i in lcoordstheo]
 
