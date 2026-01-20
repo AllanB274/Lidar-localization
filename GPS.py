@@ -25,6 +25,17 @@ class Paquet: #ensemble de points de la classe Point definis par un centre et un
         
 ptt={0:(0,0),1:(3000,1000),2:(0,2000),3:(1300,-100)}
 
+def f_least_square(X, Lcoorbalise): #Lcoorbalise de la forme [(pos bal 1 exp réf robot, pos bal 1 théo table),...]
+    robot_x, robot_y, robot_theta = X
+    out = []
+    matrrot = np.matrix([[np.cos(robot_theta), np.sin(robot_theta)], [-np.sin(robot_theta), np.cos(robot_theta)]])
+    for (plr,ptt) in Lcoorbalise:
+        plt = matrrot@np.matrix([[plr[0]],[plr[1]]]) + np.matrix([[robot_x],[robot_y]])
+        res = np.matrix([[ptt[0]],[ptt[1]]]) - plt
+        out.append(res[0, 0])
+        out.append(res[1, 0])
+    return out
+
 def distance(p1,p2): #des points de classe Point en arg
     return np.sqrt(p1.dist**2+p2.dist**2-2*p1.dist*p2.dist*np.cos(p1.angle-p2.angle)) #renvoie un int
 
@@ -171,4 +182,5 @@ def GPS(L,res):
     paquets_filtres=filtre_paquets(paquets,res) #on filtre les paquets
     balises=trouver_balises(paquets_filtres)    #on trouve les balises en cherchant le triangle
     return bilateration(balises,ptt)  #on trilateralise
+
 
