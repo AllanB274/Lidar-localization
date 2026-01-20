@@ -24,6 +24,8 @@ class LidarWatcher:
         
         self.pub_balise = ProtobufPublisher[lidar_pb.Balises](lidar_pb.Balises, "balises_near_odom")
 
+        self.pub_position = ProtobufPublisher[lidar_pb.Position](lidar_pb.Position, "robot_position")
+
     def __enter__(self):
         return self
     
@@ -60,11 +62,17 @@ class LidarWatcher:
             balise.y.extend([bal.centre.y])
         self.pub_balise.send(balise)
 
+    def send_data_position(self, position):
+        p = lidar_pb.Position()
+        p.x, p.y, p.theta = position
+        self.pub_position.send(p)
+
 if __name__ == "__main__":
     with LidarWatcher() as lw:
         while ecal_core.ok():
 
             time.sleep(0.5)
+
 
 
 
