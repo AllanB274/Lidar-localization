@@ -25,11 +25,16 @@ class Paquet: #ensemble de points definis par un centre et un diamètre (le diam
         self.size=max([distance2(p,self.centre) for p in L]) if len(L)>0 else 0
         ### self.size=max([distance2(p,self.centre) for p in L]) if len(L)>0 else 0
 
-def f_least_square(coordexp): #le problème c'est que la fonction ne doit avoir qu'un seul argument, donc soit on y met les coordonnées de la table, soit il faut calculer les coordonnées théoriques dans la fonction en ne prenant qu'un seul argument ou alors en mettant des variables globales mais je suis pas sûr que ça soit vraiment possible
-    # signature voulu : fun(x, *args, **kwargs) avec x des coos mesurées -> least square testera différents x sur cette fonction pour la minimiser
-    # x doit nécéssairement être un ndarray -> [b1, b2, ...], Il faut passer les coos théorique voulues dans les args alors
-    lcoordstheo = [(0,0),(3,1),(0,2)]
-    return [(coordsexp[0]-i[0],coordsexp[1]-i[1]) for i in lcoordstheo]
+def f_least_square(X, Lcoorbalise): #Lcoorbalise de la forme [(pos bal 1 exp réf robot, pos bal 1 théo table),...]
+    robot_x, robot_y, robot_theta = X
+    out = []
+    matrrot = np.matrix([[np.cos(robot_theta), np.sin(robot_theta)], [-np.sin(robot_theta), np.cos(robot_theta)]])
+    for (plr,ptt) in Lcoorbalise:
+        plt = matrrot@np.matrix([[plr[0]],[plr[1]]]) + np.matrix([[robot_x],[robot_y]])
+        res = np.matrix([[ptt[0]],[ptt[1]]]) - plt
+        out.append(res[0, 0])
+        out.append(res[1, 0])
+    return out
 
 def distance(p1,p2): #calcule la distance entre deux points à partir de leurs coordonnées cartésiennes
     return np.sqrt((p2.x-p1.x)**2+(p2.y-p1.y)**2)
@@ -219,5 +224,6 @@ def GPS(L,res):
     balises=trouver_balises(paquets_filtres)    #on trouve les balises en cherchant le triangle
     print(f"bil : {bilateration(balises,(0,0),(3000,1000),(0,2000))}")
     return (trilateration(balises[:-1],0,0,3000,1000,0,2000),balises)   #on trilateralise
+
 
 
