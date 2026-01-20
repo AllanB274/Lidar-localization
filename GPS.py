@@ -16,18 +16,19 @@ class Point: #point dont les coordonnées sont definies dans le référentiel ro
         else:
             raise("Pb get_amalgames.py Point()")
         self.qualite=qualite
+    def __repr__(self):
+        return f"({self.x}, {self.y})"
         
 class Paquet: #ensemble de points de la classe Point definis par un centre et un diamètre (le diamètre size ne sert que pour l'affichage des paquets)
     def __init__(self,L):
         self.nb=len(L)
         self.centre=Point(angle=np.mean([p.angle for p in L]),distance=np.mean([p.dist for p in L]),qualite=255) #tu définis le centre en polaire, c'est parfait
         self.size=max([distance(p,self.centre) for p in L]) if len(L)>0 else 0
-        
-ptt={0:(0,0),1:(3000,1000),2:(0,2000),3:(1300,-100)}
 
 def f_least_square(X, Lcoorbalise): #Lcoorbalise de la forme [(pos bal 1 exp réf robot, pos bal 1 théo table),...]
     robot_x, robot_y, robot_theta = X
     out = []
+    robot_theta *=-1
     matrrot = np.matrix([[np.cos(robot_theta), np.sin(robot_theta)], [-np.sin(robot_theta), np.cos(robot_theta)]])
     for (plr,ptt) in Lcoorbalise:
         plt = matrrot@np.matrix([[plr[0]],[plr[1]]]) + np.matrix([[robot_x],[robot_y]])
@@ -146,8 +147,8 @@ def bilateration(balises,ptt):
     d2=b2.dist
     d3=b3.dist
     (x1,y1)=ptt[0]
-    (x2,y2)=(b2.x,b2.y)=ptt[1]
-    (x3,y3)=(b3.x,b3.y)=ptt[2]
+    (x2,y2)=ptt[1]
+    (x3,y3)=ptt[2]
     # on doit trouver les deux positions possibles du robot
     #calcul à vérifier
     D=np.sqrt((x2-x1)**2+(y2-y1)**2) #distance observée entre les deux balises
@@ -177,10 +178,14 @@ def bilateration(balises,ptt):
     
 
 def GPS(L,res):
+    ptt={0:(3000,2000),1:(0,1000),2:(3000,0),3:(1700,2000)}
     points_propres=filtre_points(L)             #on filtre les points         
     paquets=voisins(100,points_propres)         #on créé les paquets
     paquets_filtres=filtre_paquets(paquets,res) #on filtre les paquets
     balises=trouver_balises(paquets_filtres)    #on trouve les balises en cherchant le triangle
-    return bilateration(balises,ptt), balises  #on trilateralise
+    # return balises
+    hyp = bilateration(balises,ptt)
+    coos = least_squares(f_least_square, hyp["robot"], args=(hyp["coord_balises"], ))
+    return coos.x, balises, hyp  #on trilateralise
 
 

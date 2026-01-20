@@ -34,11 +34,12 @@ class LidarWatcher:
         ecal_core.finalize()
 
     def data_callback(self, pub_id : ecal_core.TopicId, data : ReceiveCallbackData[lidar_pb.Lidar]) -> None:
-        print('data')
         res=0.7 #450 points pour 360 degrés
         points=[Point(angle=data.message.angles[i], distance=data.message.distances[i], qualite=data.message.quality[i]) for i in range(len(data.message.distances))]
-        dico, balises=GPS(points,res)
-        self.send_data_position(dico["robot"])
+        # balises=GPS(points,res)
+        coos, balises, h=GPS(points,res)
+        print(h["robot"])
+        self.send_data_position(coos)
         if balises!=None:
             self.send_data_balises(balises)
 
