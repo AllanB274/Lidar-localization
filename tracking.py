@@ -54,7 +54,7 @@ def tracking(L,X0,balises,a,r):
         if b!=None:
             nouvelles_balises.append(retrouver_balise(L,b,a,r).centre) #on retrouve les balises une par une
         else:
-            nouvelles_balises.append(retrouver_balise(L,balise_perdue(ptt[balises.index(b)]),a,r).centre)
+            nouvelles_balises.append(retrouver_balise(L,balise_perdue(ptt[balises.index(b)],X0),a,r).centre)
     
     liste_pour_ls = []
     for i,j in enumerate(nouvelles_balises):
