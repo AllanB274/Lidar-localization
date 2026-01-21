@@ -14,7 +14,7 @@ class LidarWatcher:
     def __init__(self):
         self.compteur_tracking = 0
         self.anciennes_balises = None # --> liste de centre des paquets balises
-        self.anciennes_coords = None
+        self.anciennes_coords = (0, 0, 0)
         
         if not ecal_core.is_initialized():
             # Initialisation d'ECAL
@@ -47,19 +47,24 @@ class LidarWatcher:
 
         print(f"{'':~^100}")
         print(f"{self.compteur_tracking} étapes")
+        track = {"robot":(0, 0, 0),"balises":[None]}
         try:
             # tracking renvoie : {'robot' : (x, y, theta), 'balises' : list of Point}
             track = tracking(points, self.anciennes_coords, self.anciennes_balises, np.pi/5, 100)
+            print("lalalalalalalalla, c'est un test")
             assert(self.compteur_tracking>0 or None in track['balises'])
             print("tracking")
             coords = track['robot']
             balises = track['balises']
             self.compteur_tracking-=1
-        except:
+        except Exception as e:
+            print(e)
             print("GPS")
             coords, balises, h=GPS(points,res)
             balises = [b.centre for b in balises]
-            print(h["robot"])
+            print("gps", coords)
+            print("track", track['robot'])
+            print(np.array(coords)-np.array(track['robot']))
             self.compteur_tracking = NB_ETAPES
 
         # coords, balises, h=GPS(points,res)

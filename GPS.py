@@ -182,6 +182,10 @@ def GPS(L,res):
     balises=trouver_balises(paquets_filtres)    #on trouve les balises en cherchant le triangle
     # return balises
     hyp = bilateration(balises,ptt)
+    print(hyp)
+    if np.nan in hyp['robot']:
+        hyp['robot']=(0, 0, 0)
+    hyp["robot"] = (0, 0, 0)
     coos = least_squares(f_least_square, hyp["robot"], args=(hyp["coord_balises"], ))
     return coos.x, balises, hyp  #on trilateralise
 

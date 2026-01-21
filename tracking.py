@@ -60,7 +60,10 @@ def tracking(L,X0,balises,a,r):
     for i,j in enumerate(nouvelles_balises):
         if j != None:
             liste_pour_ls.append(((j.x, j.y), ptt[i]))
-    coos = least_squares(f_least_square, X0, args=(liste_pour_ls))
+    print(X0)
+    if not X0.all(None):
+        X0=(0, 0, 0)
+    coos = least_squares(f_least_square, X0, args=(liste_pour_ls, )).x
     return {"robot":coos,"balises":nouvelles_balises}
 
     
