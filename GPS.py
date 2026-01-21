@@ -136,7 +136,7 @@ def trouver_position(L):   #liste de balises
     alpha=(np.pi/2)-np.arccos((b-c*np.cos(theta))/a)
     return(b*np.cos(alpha),abs(b*np.sin(alpha)))
     
-def bilateration2(balises,ptt):
+def bilateration(balises,ptt):
     #balises = liste de balises
     # ATTENTION x1, y1 doivent être les coordonnées de la balise d'origine (0,0)
     # coord 1,2 et 3 sont les coordonnées théoriques des trois premières balises dans L
@@ -174,45 +174,6 @@ def bilateration2(balises,ptt):
         coords["coord_balises"].append(((b.x,b.y),ptt[B.index(b)]))
     return coords
     
-def bilateration(balises,ptt):
-    #balises = liste de balises
-    # ptt est le dictionnaire des position reelles des balises dans le referentiel table
-    
-    points_balises=[b.centre if b != None else None for b in balises] #liste de point
-    B=[p for p in points_balises if p != None]    #on enleve si il y a une balise absente
-    b1,b2,b3=B[0],B[1],B[2]
-    d1=b1.dist
-    d2=b2.dist
-    d3=b3.dist
-    (x1,y1)=ptt[points_balises.index(b1)]
-    (x2,y2)=ptt[points_balises.index(b2)]
-    (x3,y3)=ptt[points_balises.index(b3)]
-    # on doit trouver les deux positions possibles du robot
-    #calcul à vérifier
-    D=np.sqrt((x2-x1)**2+(y2-y1)**2) #distance observée entre les deux balises
-    A=np.sqrt(4*D**2*d1**2 - (d1**2 - d2**2 + D**2)**2) #terme commun aux 4 valeurs
-
-    xa  = x1 + (d1**2 - d2**2 + D**2)*(x2 - x1)/(2*D**2) + (y2 - y1)*A/(2*D**2)
-    ya  = y1 + (d1**2 - d2**2 + D**2)*(y2 - y1)/(2*D**2) - (x2 - x1)*A/(2*D**2)
-
-    xb = x1 + (d1**2 - d2**2 + D**2)*(x2 - x1)/(2*D**2) - (y2 - y1)*A/(2*D**2)
-    yb = y1 + (d1**2 - d2**2 + D**2)*(y2 - y1)/(2*D**2) + (x2 - x1)*A/(2*D**2)
-    
-    #on leve le doute sur la bonne position grâce à la troisieme balise
-    da=np.sqrt((x3-xa)**2+(y3-ya)**2)
-    db=np.sqrt((x3-xb)**2+(y3-yb)**2)   
-    if abs(da-d3)<abs(db-d3):
-        x,y=xa,ya
-    else:
-        x,y=xb,yb
-    
-    theta=np.pi-b1.angle+np.atan2(y-y1,x-x1) #angle du robot
-    coords={"robot":(x,y,theta),"coord_balises":[]}
-    for b in points_balises:
-        coords["coord_balises"].append(((b.x,b.y),ptt[points_balises.index(b)])) if b!= None else None
-    return coords
-    
-
 def GPS(L,res):
     ptt={0:(3094,1950),1:(-94,1000),2:(3094,5),3:(1705,2094)}
     points_propres=filtre_points(L)             #on filtre les points         
@@ -223,6 +184,7 @@ def GPS(L,res):
     hyp = bilateration(balises,ptt)
     coos = least_squares(f_least_square, hyp["robot"], args=(hyp["coord_balises"], ))
     return coos.x, balises, hyp  #on trilateralise
+
 
 
 
