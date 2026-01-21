@@ -13,8 +13,8 @@ def filtre_point(L,r,a,a_balise,d_balise):
     Liste_point=[]
     for point in L:
         #on doit verifier que les points sont biens dans le cone de tolerance et de bonne qualité
-        if (point.angle-(a_balise-a/2))*(point.angle-(a_balise+a/2))<0:
-            if (point.dist-(d_balise-r/2))*(point.dist-(d_balise+r/2))<0:
+        if (point.angle-(a_balise-a))*(point.angle-(a_balise+a))<0:
+            if (point.dist-(d_balise-r))*(point.dist-(d_balise+r))<0:
                 if point.qualite>200:
                     Liste_point.append(point)
     return Liste_point
