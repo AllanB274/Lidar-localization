@@ -8,7 +8,7 @@ from GPS import Point, GPS
 import numpy as np
 from tracking import tracking
 
-NB_ETAPES = 10      # Nombre de tracking mini entre chaque GPS 
+NB_ETAPES = 20      # Nombre de tracking mini entre chaque GPS 
 
 class LidarWatcher:
     def __init__(self):
@@ -44,12 +44,14 @@ class LidarWatcher:
         res=0.7 #450 points pour 360 degrés
         points=[Point(angle=data.message.angles[i], distance=data.message.distances[i], qualite=data.message.quality[i]) for i in range(len(data.message.distances))]
         # balises=GPS(points,res)
+
         print(f"{'':~^100}")
         print(f"{self.compteur_tracking} étapes")
         try:
             # tracking renvoie : {'robot' : (x, y, theta), 'balises' : list of Point}
-            track = tracking(points, self.anciennes_coords, self.anciennes_balises, np.pi/2-0.5, 150)
+            track = tracking(points, self.anciennes_coords, self.anciennes_balises, np.pi/5, 100)
             assert(self.compteur_tracking>0 or None in track['balises'])
+            print("tracking")
             coords = track['robot']
             balises = track['balises']
             self.compteur_tracking-=1
@@ -59,6 +61,10 @@ class LidarWatcher:
             balises = [b.centre for b in balises]
             print(h["robot"])
             self.compteur_tracking = NB_ETAPES
+
+        # coords, balises, h=GPS(points,res)
+        # balises = [b.centre for b in balises]
+        
         self.anciennes_coords = coords
         self.anciennes_balises = balises
         self.send_data_position(coords)
