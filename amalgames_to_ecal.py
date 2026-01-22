@@ -8,7 +8,7 @@ from GPS import Point, GPS
 import numpy as np
 from tracking import tracking
 
-NB_ETAPES = 20      # Nombre de tracking mini entre chaque GPS 
+NB_ETAPES = 100      # Nombre de tracking mini entre chaque GPS 
 
 class LidarWatcher:
     def __init__(self):
@@ -41,18 +41,16 @@ class LidarWatcher:
         ecal_core.finalize()
 
     def data_callback(self, pub_id : ecal_core.TopicId, data : ReceiveCallbackData[lidar_pb.Lidar]) -> None:
-        res=0.7 #450 points pour 360 degrés
+        res=0.7
         points=[Point(angle=data.message.angles[i], distance=data.message.distances[i], qualite=data.message.quality[i]) for i in range(len(data.message.distances))]
-        # balises=GPS(points,res)
 
-        print(f"{'':~^100}")
+        print(f"{'':~^50}")
         print(f"{self.compteur_tracking} étapes")
         track = {"robot":(0, 0, 0),"balises":[None]}
         try:
             # tracking renvoie : {'robot' : (x, y, theta), 'balises' : list of Point}
-            track = tracking(points, self.anciennes_coords, self.anciennes_balises, np.pi/5, 100)
-            print("lalalalalalalalla, c'est un test")
-            assert(self.compteur_tracking>0 or None in track['balises'])
+            track = tracking(points, self.anciennes_coords, self.anciennes_balises, np.pi/8, 100)
+            assert((self.compteur_tracking>0 or None in track['balises']) and track['balises'].count(None)<3 and track['confiance']<=10000)
             print("tracking")
             coords = track['robot']
             balises = track['balises']
@@ -62,13 +60,10 @@ class LidarWatcher:
             print("GPS")
             coords, balises, h=GPS(points,res)
             balises = [b.centre for b in balises]
-            print("gps", coords)
-            print("track", track['robot'])
-            print(np.array(coords)-np.array(track['robot']))
+            print("écart tracking GPS", abs(np.array(coords)-np.array(track['robot'])))
             self.compteur_tracking = NB_ETAPES
 
-        # coords, balises, h=GPS(points,res)
-        # balises = [b.centre for b in balises]
+        print(coords)
         
         self.anciennes_coords = coords
         self.anciennes_balises = balises
@@ -91,9 +86,10 @@ class LidarWatcher:
         # balises : point tuple
         balise = lidar_pb.Balises()
         for i, bal in enumerate(balises):
-            balise.index.extend([i+1])
-            balise.x.extend([bal.x])
-            balise.y.extend([bal.y])
+            if bal!=None:
+                balise.index.extend([i+1])
+                balise.x.extend([bal.x])
+                balise.y.extend([bal.y])
         self.pub_balise.send(balise)
 
     def send_data_position(self, position):
@@ -105,7 +101,6 @@ if __name__ == "__main__":
     with LidarWatcher() as lw:
         while ecal_core.ok():
             time.sleep(0.5)
-
 
 
 
