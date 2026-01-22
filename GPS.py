@@ -19,7 +19,7 @@ class Point: #point dont les coordonnées sont definies dans le référentiel ro
     def __repr__(self):
         return f"({self.x}, {self.y})"
         
-class Paquet: #ensemble de points de la classe Point definis par un centre et un diamètre (le diamètre size ne sert que pour l'affichage des paquets)
+class Paquet: #ensemble de points de la classe Point defini par un centre et un diamètre (le diamètre size ne sert que pour l'affichage des paquets)
     def __init__(self,L):
         self.nb=len(L)
         self.centre=Point(angle=np.mean([p.angle for p in L]),distance=np.mean([p.dist for p in L]),qualite=255) #tu définis le centre en polaire, c'est parfait
@@ -37,17 +37,22 @@ def f_least_square(X, Lcoorbalise): #Lcoorbalise de la forme [(pos bal 1 exp ré
         out.append(res[1, 0])
     return out
 
-def distance(p1,p2): #des points de classe Point en arg
+def distance(p1,p2):
+    #p1,p2 : points de classe Point
+    #formule de Al Kashi
     return np.sqrt(p1.dist**2+p2.dist**2-2*p1.dist*p2.dist*np.cos(p1.angle-p2.angle)) #renvoie un int
 
-def filtre_points(points): #filtre les points en fonction de leur qualité et de leur distance. Prend des points en arg
-    points_propres=[]
+def filtre_points(points): #filtre les points en fonction de leur qualité et de leur distance
+    # points: liste de points de classe Point
+    points_filtres=[]
     for p in points:
         if p.dist < np.sqrt(2000**2+3000**2) and p.dist > 10 and p.qualite > 200: #si c'est pas trop loin de la table et que la qualité est supérieure à 200/255
-            points_propres.append(p)
-    return points_propres #renvoie des points de classe point
+            points_filtres.append(p)
+    return points_filtres #renvoie une liste de points de classe Point
 
 def filtre_paquets(paquets,res): #filtre les paquets en fonction du nombre de points qui les composent
+    #paquets : liste de paquets de type Paquets
+    # res : resolution angulaire du lidar en degréite
     paquets_filtres=[]
     alpha=res*(np.pi/180)
     for p in paquets:
@@ -56,9 +61,10 @@ def filtre_paquets(paquets,res): #filtre les paquets en fonction du nombre de po
             paquets_filtres.append(p)
     return paquets_filtres
 
-res=0.7 #résolution angulaire. Elle est normalement de 0.788 mais on en est pas sûr. A remplacer si plus d'informations sur la précision angulaire
 
-def voisins(eps,points): #prends un epsilon et une liste de points
+def voisins(eps,points):
+    #eps : float distance minimale entre deux points pour etre dans le meme paquets
+    #points : liste de points de classe Point
     paquets=[]
     traite=[]
     a_traiter=[]
@@ -67,7 +73,7 @@ def voisins(eps,points): #prends un epsilon et une liste de points
             a_traiter.append(p) #on l'ajoute dans une liste a_traiter
             g=[]                #on crée un nouveau groupe g
             while a_traiter !=[]: #tant qu'il reste des points à traiter :
-                i=a_traiter.pop()    #on traite le premier point de la liste de points à traiter en le retirant de celle-ci
+                i=a_traiter.pop()    #on traite le dernier point de la liste de points à traiter en le retirant de celle-ci
                 traite.append(i)     #on ajoute ce point dans la liste traitée
                 g.append(i)            #on l'ajoute dans ce nouveau groupe g
                 for j in points:        #on parcourt les autres points
@@ -100,17 +106,21 @@ def robot_in_balises(balises, return_rotated=False):
 
 def trouver_balises(paquets, eps=250):
     #ici on veut trouver si 4 paquets sont des balises candidates
-    def bonne_distance(j,balises,X,eps): #balise candidate, balises validées, distances souhaitées à ces balises et précision
+    def bonne_distance(j,balises,X,eps):
+        #j : balise candidate de classe Paquet
+        #balises : liste de balises validées de classe Paquet
+        #X : liste de distances souhaitées aux balises validées
+        #eps : tolerance
         #on prend une balise candidate et on vérifie qu'elle est aux distances souhaitées des autres balises déjà validées
         for b in balises:
             d=distance(j.centre,b.centre)
             for e in X:
-                if abs(d-e)<eps:       #si la distance entre la balise candidate et la balise b déjà choisie appartient à notre liste de distances alors c'est ok et on retire la distance de la liste
+                if abs(d-e)<eps: #si la distance entre la balise candidate et la balise b déjà choisie appartient à notre liste de distances alors c'est ok et on retire la distance de la liste
                     X.remove(e)
         return len(X)==0
         
-    d1=np.sqrt(3000**2+1000**2) #distance longue entre balises
-    d2=2000 #distance courte entre balises
+    d1=np.sqrt(3088**2+950**2) #distance longue entre balises
+    d2=1990 #distance courte entre balises
     for p in paquets:     #on prend un premier point 
         for i in paquets: #on prend un deuxième point
             if abs(distance(p.centre,i.centre)-d1)<eps: #si ces deux points sont à distance du grand côté du triangle :
@@ -124,34 +134,20 @@ def trouver_balises(paquets, eps=250):
     return None
 
 
-def trouver_position(L):   #liste de balises
-
-    #je vais mettre x1,y1,x2,y2,x3,y3 en parametre
-
-    (b1,b2,b3)=(L[0].centre,L[1].centre,L[2].centre)
-    theta=abs(b1.angle-b3.angle)
-    b=b1.dist
-    c=b3.dist
-    a=distance(b1,b3)
-    alpha=(np.pi/2)-np.arccos((b-c*np.cos(theta))/a)
-    return(b*np.cos(alpha),abs(b*np.sin(alpha)))
     
-def bilateration(balises,ptt):
-    #balises = liste de balises
-    # ATTENTION x1, y1 doivent être les coordonnées de la balise d'origine (0,0)
-    # coord 1,2 et 3 sont les coordonnées théoriques des trois premières balises dans L
-    #pour l'instant x1 et y1 valent (0,0) mais je travaille sur une version plus générale
+def trilateration(balises,ptt):
+    #balises = liste de paquets de classe Paquets
+    #ptt : dictionnaire contenant les coordonnées theoriques des balises dans la base table
     B=[b.centre for b in balises]
     b1,b2,b3=B[0],B[1],B[2]
-    d1=b1.dist
+    d1=b1.dist #distance des balises par rapport au robot
     d2=b2.dist
     d3=b3.dist
-    (x1,y1)=ptt[0]
+    (x1,y1)=ptt[0] #coordonnées theoriques de mes balises
     (x2,y2)=ptt[1]
     (x3,y3)=ptt[2]
     # on doit trouver les deux positions possibles du robot
-    #calcul à vérifier
-    D=np.sqrt((x2-x1)**2+(y2-y1)**2) #distance observée entre les deux balises
+    D=np.sqrt((x2-x1)**2+(y2-y1)**2) #distance theorique entre les deux balises
     A=np.sqrt(4*D**2*d1**2 - (d1**2 - d2**2 + D**2)**2) #terme commun aux 4 valeurs
 
     xa  = x1 + (d1**2 - d2**2 + D**2)*(x2 - x1)/(2*D**2) + (y2 - y1)*A/(2*D**2)
@@ -175,20 +171,18 @@ def bilateration(balises,ptt):
     return coords
     
 def GPS(L,res):
-    ptt={0:(3094,1950),1:(-94,1000),2:(3094,5),3:(1705,2094)}
-    points_propres=filtre_points(L)             #on filtre les points         
-    paquets=voisins(100,points_propres)         #on créé les paquets
+    #L : liste de tous les points renvoyés par le Lidar
+    ptt={0:(3094,1950),1:(-94,1000),2:(3094,5),3:(1700,2094)}
+    points_filtres=filtre_points(L)             #on filtre les points         
+    paquets=voisins(100,points_filtres)         #on créé les paquets
     paquets_filtres=filtre_paquets(paquets,res) #on filtre les paquets
     balises=trouver_balises(paquets_filtres)    #on trouve les balises en cherchant le triangle
-    # return balises
-    hyp = bilateration(balises,ptt)
-    print(hyp)
+    hyp = trilateration(balises,ptt)
     if np.nan in hyp['robot']:
         hyp['robot']=(0, 0, 0)
     hyp["robot"] = (0, 0, 0)
     coos = least_squares(f_least_square, hyp["robot"], args=(hyp["coord_balises"], ))
-    return coos.x, balises, hyp  #on trilateralise
-
+    return coos.x, balises, hyp
 
 
 
