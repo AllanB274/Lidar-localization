@@ -27,6 +27,10 @@ class RadarView(QtWidgets.QWidget):
     transforms_sig=pyqtSignal(list)
 
     def __init__(self, args, parent=None):
+        
+        self.last_odom_time = 0
+        self.ODOM_TIMEOUT = 0.1  # secondes (à ajuster)
+        
         QtWidgets.QWidget.__init__(self, parent)
         self.args = args
         if not ecal_core.is_initialized():
@@ -111,7 +115,8 @@ class RadarView(QtWidgets.QWidget):
         self.amalgame_sig.emit(data)
 
     def handle_balises_odom_data(self, pub_id : ecal_core.TopicId, data : ReceiveCallbackData[pbl.Balises]):
-        data = list(zip(data.message.index,data.message.x,data.message.y))    
+        data = list(zip(data.message.index,data.message.x,data.message.y))
+        self.last_odom_time = time.time()    
         self.balises_odom_sig.emit(data)
 
     def handle_balises_nearodom_data(self, pub_id : ecal_core.TopicId, data : ReceiveCallbackData[pbl.Balises]):
@@ -123,6 +128,8 @@ class RadarView(QtWidgets.QWidget):
         self.data = []
 
     def paintEvent(self, e: QtGui.QPaintEvent) -> None:
+        if time.time() - self.last_odom_time > self.ODOM_TIMEOUT:
+            self.balise_odom_data = []
         painter = QtGui.QPainter(self)
 
         # paint background
@@ -280,4 +287,5 @@ if __name__ == "__main__":
         main_window.show()
     #app.activateWindow()
     #app.raise_()
+    QtCore.QTimer.singleShot(0, main_window.show)
     qapp.exec()

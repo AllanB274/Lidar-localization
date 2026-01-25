@@ -52,8 +52,10 @@ def tracking(L,X0,balises,a,r):
         return Point(angle=a,distance=d)
     
     nouvelles_balises=[]
+    balises_supposees=[]
     for b in balises:
         b_s=position_balise_robot(ptt[balises.index(b)],X0) #balise supposee
+        balises_supposees.append(b_s)
         balise_retrouvee=retrouver_balise(L,b_s,a,r)
         if balise_retrouvee != None :
             nouvelles_balises.append(balise_retrouvee.centre)
@@ -68,7 +70,7 @@ def tracking(L,X0,balises,a,r):
         X0=(0, 0, 0)
     ls = least_squares(f_least_square, X0, args=(liste_pour_ls, ))
     coos = ls.x
-    return {"robot":coos,"balises":nouvelles_balises,"confiance":ls.cost}
+    return {"robot":coos,"balises":nouvelles_balises,"confiance":ls.cost,"supp":balises_supposees}
 
     
     

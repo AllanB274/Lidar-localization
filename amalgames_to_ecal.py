@@ -30,6 +30,8 @@ class LidarWatcher:
         self.pub_amal = ProtobufPublisher[lidar_pb.Amalgames](lidar_pb.Amalgames, "amalgames")
         
         self.pub_balise = ProtobufPublisher[lidar_pb.Balises](lidar_pb.Balises, "balises_near_odom")
+        
+        self.pub_balise_supp = ProtobufPublisher[lidar_pb.Balises](lidar_pb.Balises, "balises_odom")
 
         self.pub_position = ProtobufPublisher[lidar_pb.Position](lidar_pb.Position, "lidar_pos")
 
@@ -50,11 +52,12 @@ class LidarWatcher:
         try:
             # tracking renvoie : {'robot' : (x, y, theta), 'balises' : list of Point}
             track = tracking(points, self.anciennes_coords, self.anciennes_balises, np.pi/8, 100)
-            assert((self.compteur_tracking>0 or None in track['balises']) and track['balises'].count(None)<3 and track['confiance']<=10000)
+            assert((self.compteur_tracking>0 or None in track['balises']) and track['balises'].count(None)<3 and track['confiance']<=11000)
             print("tracking")
             coords = track['robot']
             balises = track['balises']
             self.compteur_tracking-=1
+            self.send_data_balises(track["supp"], self.pub_balise_supp)
         except Exception as e:
             print(e)
             print("GPS")
@@ -69,7 +72,7 @@ class LidarWatcher:
         self.anciennes_balises = balises
         self.send_data_position(coords)
         if balises!=None:
-            self.send_data_balises(balises)
+            self.send_data_balises(balises, self.pub_balise)
 
     def send_data_amal(self, paquets):
         """Send a LIDAR data message"""
@@ -82,7 +85,7 @@ class LidarWatcher:
         self.pub_amal.send(amal)
         # print(f"{len(paquets)} data sent to ecal!")
         
-    def send_data_balises(self, balises):
+    def send_data_balises(self, balises, pub):
         # balises : point tuple
         balise = lidar_pb.Balises()
         for i, bal in enumerate(balises):
@@ -90,7 +93,7 @@ class LidarWatcher:
                 balise.index.extend([i+1])
                 balise.x.extend([bal.x])
                 balise.y.extend([bal.y])
-        self.pub_balise.send(balise)
+        pub.send(balise)
 
     def send_data_position(self, position):
         p = lidar_pb.Position()
